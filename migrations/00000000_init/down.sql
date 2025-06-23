@@ -1,0 +1,12 @@
+DROP INDEX ix_notes_csum;
+DROP INDEX ix_revlog_cid;
+DROP INDEX ix_cards_sched;
+DROP INDEX ix_cards_nid;
+DROP INDEX ix_revlog_usn;
+DROP INDEX ix_cards_usn;
+DROP INDEX ix_notes_usn;
+DROP TABLE graves;
+DROP TABLE revlog;
+DROP TABLE cards;
+DROP TABLE notes;
+DROP TABLE col;
