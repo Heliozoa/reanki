@@ -12,7 +12,6 @@ keywords = ["anki", "flashcards"]
 categories = []
 resolver = "2"
 
-
 [dependencies]
 diesel = { version = "2.2.11", features = [
   "sqlite",
