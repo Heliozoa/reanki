@@ -1,16 +1,16 @@
 mod schema;
 
-use diesel::{prelude::*, ConnectionError, SqliteConnection};
+use diesel::{ConnectionError, SqliteConnection, prelude::*};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness};
 use serde_json::{Map, Value};
 use std::{
-    collections::{hash_map::Entry, HashMap},
+    collections::{HashMap, hash_map::Entry},
     io::{Seek, Write},
     sync::Arc,
     time::UNIX_EPOCH,
 };
 use thiserror::Error;
-use zip::{write::SimpleFileOptions, ZipWriter};
+use zip::{ZipWriter, write::SimpleFileOptions};
 
 const MIGRATIONS: EmbeddedMigrations = diesel_migrations::embed_migrations!();
 
@@ -406,7 +406,7 @@ impl Note {
                 self.card_ord,
                 note_id,
                 &self.model,
-                &deck,
+                deck,
                 conn,
             )?;
         }
@@ -414,6 +414,8 @@ impl Note {
         Ok(())
     }
 }
+
+pub type TemplateMap = HashMap<i32, (i32, Arc<Template>)>;
 
 /// Anki deck, a collection of notes.
 #[derive(Debug)]
@@ -423,7 +425,7 @@ pub struct Deck {
     description: String,
     notes: Vec<Note>,
     // model id => template id => (template ord, template)
-    model_to_templates: HashMap<i32, (Arc<Model>, HashMap<i32, (i32, Arc<Template>)>)>,
+    model_to_templates: HashMap<i32, (Arc<Model>, TemplateMap)>,
 }
 
 impl Deck {
@@ -466,11 +468,10 @@ impl Deck {
 
         conn.exclusive_transaction(move |tx| {
             tx.run_pending_migrations(MIGRATIONS).map_err({
-                let x = error!(
+                error!(
                     Error::Generic,
                     "Failed to run migrations for in-memory sqlite database"
-                );
-                x
+                )
             })?;
             self.write_to_db(tx)?;
             Result::<(), Error>::Ok(())
@@ -490,10 +491,10 @@ impl Deck {
 
     // writes the deck into a sqlite db
     fn write_to_db(&self, conn: &mut SqliteConnection) -> Result<(), Error> {
-        Col::write_to_db(&self, conn)?;
+        Col::write_to_db(self, conn)?;
         for note in &self.notes {
             let (_m, model_templates) = self.model_to_templates.get(&note.model.id).unwrap();
-            note.write_to_db(&self, model_templates, conn)?;
+            note.write_to_db(self, model_templates, conn)?;
         }
         Ok(())
     }

@@ -1,6 +1,5 @@
-use std::{fs::File, sync::Arc};
-
 use reanki::{Deck, Field, Model, Note, Template};
+use std::{fs::File, sync::Arc};
 
 struct MyCard {
     some_field: String,
