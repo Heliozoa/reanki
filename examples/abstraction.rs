@@ -44,7 +44,7 @@ fn main() {
     let mut deck = Deck::new(1, "My deck".to_string(), "My reanki deck".to_string());
     let model = Arc::new(Model::new(
         2,
-        "My model".to_string(),
+        "My model 2".to_string(),
         MyCard::fields(),
         0,
         MyCard::css(),

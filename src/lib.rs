@@ -286,7 +286,7 @@ impl Card {
         let card_ord: i64 = card_ord.into();
         diesel::insert_into(cards::table)
             .values((
-                // doesn't seem to be used for anything except the created at timestamp
+                // doesn't seem to be used for anything, possibly for some timestamp
                 cards::id.eq(card_id_timestamp),
                 // note id
                 cards::nid.eq(note_id),
@@ -378,6 +378,7 @@ impl Note {
         templates: &HashMap<i64, (i64, Arc<Template>)>,
         conn: &mut SqliteConnection,
         timestamp_secs: i64,
+        note_id_timestamp: i64,
         card_id_timestamp: &mut i64,
     ) -> Result<(), Error> {
         use schema::notes;
@@ -387,6 +388,8 @@ impl Note {
 
         let note_id = diesel::insert_into(notes::table)
             .values((
+                // doesn't seem to be used for anything except the created timestamp for notes
+                notes::id.eq(note_id_timestamp),
                 notes::guid.eq(&self.guid),
                 notes::mid.eq(self.model.id),
                 notes::mod_.eq(timestamp_secs),
@@ -503,13 +506,16 @@ impl Deck {
         let mut card_id_timestamp = timestamp_millis;
 
         Col::write_to_db(self, conn, timestamp_secs, timestamp_millis)?;
+        let mut note_id_timestamp = timestamp_millis;
         for note in &self.notes {
             let (_m, model_templates) = self.model_to_templates.get(&note.model.id).unwrap();
+            note_id_timestamp += 1;
             note.write_to_db(
                 self,
                 model_templates,
                 conn,
                 timestamp_secs,
+                note_id_timestamp,
                 &mut card_id_timestamp,
             )?;
         }

@@ -12,7 +12,7 @@ fn main() -> Result<(), reanki::Error> {
     // A model defines what fields our cards will have.
     let model = Arc::new(Model::new(
         1,
-        "My model".to_string(),
+        "My model 1".to_string(),
         vec![
             Field::new("question-field".to_string()),
             Field::new("answer-field".to_string()),
